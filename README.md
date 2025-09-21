@@ -15,20 +15,19 @@ Microwatt already includes integer multiply/divide and an FPU, but they are writ
 
    - Booth-Dadda Multiplier (32/64-bit): Radix-4 Booth encoding + Dadda tree + final prefix adder; 1–2 pipeline stages (configurable) to hit timing.
 
-Fast Divider: Iterative SRT-4 (2 bits/iter) with early-exit and speculative correction; 1–2 cycle/quotient-chunk micro-pipeline.
+   - Fast Divider: Iterative SRT-4 (2 bits/iter) with early-exit and speculative correction; 1–2 cycle/quotient-chunk micro-pipeline.
 
-Bit-ops: Optimized popcount/leading-zero (tree structures), wiring mindful; replaces countbits.vhdl critical cones.
+   - Bit-ops: Optimized popcount/leading-zero (tree structures), wiring mindful; replaces countbits.vhdl critical cones.
 
-Clean SKY130 mapping: Only standard-cell logic; no analog or SRAM macros; STA via OpenSTA; sign-off in OpenLane (chipIgnite flow). Challenge requires SKY130 + standard cells + passing precheck—this fits. 
-ChipFoundry
+   - Clean SKY130 mapping: Only standard-cell logic; no analog or SRAM macros; STA via OpenSTA; sign-off in OpenLane (chipIgnite flow). Challenge requires SKY130 + standard cells + passing precheck—this fits. 
 
 2) Integration into Microwatt
 
-Drop-in replacement of multiply*.vhdl, divider.vhdl, FPU mantissa adder/multiplier, and ALU adder cone; minor changes in execute1.vhdl for updated latencies/bypass.
+   - Drop-in replacement of multiply*.vhdl, divider.vhdl, FPU mantissa adder/multiplier, and ALU adder cone; minor changes in execute1.vhdl for updated latencies/bypass.
 
-Interfaces preserved (operand/valid/ready/exception) to avoid architectural changes.
+   - Interfaces preserved (operand/valid/ready/exception) to avoid architectural changes.
 
-Config flags to select baseline vs. accelerated units at synthesis.
+   - Config flags to select baseline vs. accelerated units at synthesis.
 
 Repo evidence of these blocks existing today (for us to replace/enhance): multiply.vhdl, multiply-32s.vhdl, divider.vhdl, fpu.vhdl, countbits.vhdl.
 
