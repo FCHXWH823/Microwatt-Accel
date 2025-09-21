@@ -9,11 +9,11 @@ We accelerate the Microwatt POWER core by replacing its baseline integer/floatin
 Microwatt already includes integer multiply/divide and an FPU, but they are written for clarity and portability, not maximum PPA. By swapping in timing-aware arithmetic macros (prefix adders tuned for wire delay at 130 nm, pipelined Booth-Dadda multiplier, faster divider, better bit-ops), we can lift core IPC on arithmetic-heavy workloads while keeping the pipeline and ISA intact. We’ll integrate within Microwatt’s execution path (execute1.vhdl, multiply*.vhdl, divider.vhdl, fpu.vhdl) using the same interfaces and updated latency parameters.
 
 ## What we’re building
-- Arithmetic Slice (AS) IP (SKY130-ready)
+1) Arithmetic Slice (AS) IP (SKY130-ready)
 
-Hybrid Prefix Adders (64-bit): Han-Carlson/Brent-Kung hybrids to balance fanout and wirelength at 130 nm; reused in integer ALU and FPU mantissa paths.
+   - Hybrid Prefix Adders (64-bit): Han-Carlson/Brent-Kung hybrids to balance fanout and wirelength at 130 nm; reused in integer ALU and FPU mantissa paths.
 
-Booth-Dadda Multiplier (32/64-bit): Radix-4 Booth encoding + Dadda tree + final prefix adder; 1–2 pipeline stages (configurable) to hit timing.
+   - Booth-Dadda Multiplier (32/64-bit): Radix-4 Booth encoding + Dadda tree + final prefix adder; 1–2 pipeline stages (configurable) to hit timing.
 
 Fast Divider: Iterative SRT-4 (2 bits/iter) with early-exit and speculative correction; 1–2 cycle/quotient-chunk micro-pipeline.
 
@@ -22,7 +22,7 @@ Bit-ops: Optimized popcount/leading-zero (tree structures), wiring mindful; repl
 Clean SKY130 mapping: Only standard-cell logic; no analog or SRAM macros; STA via OpenSTA; sign-off in OpenLane (chipIgnite flow). Challenge requires SKY130 + standard cells + passing precheck—this fits. 
 ChipFoundry
 
-- Integration into Microwatt
+2) Integration into Microwatt
 
 Drop-in replacement of multiply*.vhdl, divider.vhdl, FPU mantissa adder/multiplier, and ALU adder cone; minor changes in execute1.vhdl for updated latencies/bypass.
 
