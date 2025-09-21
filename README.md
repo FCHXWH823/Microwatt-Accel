@@ -1,3 +1,40 @@
+# Microwatt-Accel: High-Speed Arithmetic Slice for the OpenPOWER Microwatt Core (SKY130)
+
+## Abstract
+
+We accelerate the Microwatt POWER core by replacing its baseline integer/floating-point arithmetic with a custom, timing-driven arithmetic slice: hybrid parallel-prefix adders, Booth-Dadda multipliers, a fast SRT-style divider, and optimized popcount/leading-zero logic. The slice is ISA-compatible, drop-in at the execute stage, and verified with RTL testbenches plus post-layout STA/SDF. All RTL, OpenLane configs, and (if we use AI for code) prompt logs are open-sourced per the challenge rules. Target: 1.5–3.0× cycle-level speedups on arithmetic-heavy kernels within the OpenFrame user area on SKY130.
+
+## Motivation
+
+Microwatt already includes integer multiply/divide and an FPU, but they are written for clarity and portability, not maximum PPA. By swapping in timing-aware arithmetic macros (prefix adders tuned for wire delay at 130 nm, pipelined Booth-Dadda multiplier, faster divider, better bit-ops), we can lift core IPC on arithmetic-heavy workloads while keeping the pipeline and ISA intact. We’ll integrate within Microwatt’s execution path (execute1.vhdl, multiply*.vhdl, divider.vhdl, fpu.vhdl) using the same interfaces and updated latency parameters.
+
+## What we’re building
+1) Arithmetic Slice (AS) IP (SKY130-ready)
+
+Hybrid Prefix Adders (64-bit): Han-Carlson/Brent-Kung hybrids to balance fanout and wirelength at 130 nm; reused in integer ALU and FPU mantissa paths.
+
+Booth-Dadda Multiplier (32/64-bit): Radix-4 Booth encoding + Dadda tree + final prefix adder; 1–2 pipeline stages (configurable) to hit timing.
+
+Fast Divider: Iterative SRT-4 (2 bits/iter) with early-exit and speculative correction; 1–2 cycle/quotient-chunk micro-pipeline.
+
+Bit-ops: Optimized popcount/leading-zero (tree structures), wiring mindful; replaces countbits.vhdl critical cones.
+
+Clean SKY130 mapping: Only standard-cell logic; no analog or SRAM macros; STA via OpenSTA; sign-off in OpenLane (chipIgnite flow). Challenge requires SKY130 + standard cells + passing precheck—this fits. 
+ChipFoundry
+
+2) Integration into Microwatt
+
+Drop-in replacement of multiply*.vhdl, divider.vhdl, FPU mantissa adder/multiplier, and ALU adder cone; minor changes in execute1.vhdl for updated latencies/bypass.
+
+Interfaces preserved (operand/valid/ready/exception) to avoid architectural changes.
+
+Config flags to select baseline vs. accelerated units at synthesis.
+
+Repo evidence of these blocks existing today (for us to replace/enhance): multiply.vhdl, multiply-32s.vhdl, divider.vhdl, fpu.vhdl, countbits.vhdl.
+
+
+
+
 # OpenFrame Overview
 
 The OpenFrame Project provides an empty harness chip that differs significantly from the Caravel and Caravan designs. Unlike Caravel and Caravan, which include integrated SoCs and additional features, OpenFrame offers only the essential padframe, providing users with a clean slate for their custom designs.
